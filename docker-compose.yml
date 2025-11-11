@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: okr_postgres
+    environment:
+      POSTGRES_USER: okr_user
+      POSTGRES_PASSWORD: okr_password
+      POSTGRES_DB: okr_tracker
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - okr_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U okr_user -d okr_tracker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: okr_backend
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://okr_user:okr_password@postgres:5432/okr_tracker?schema=public
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_EXPIRES_IN: 7d
+      JWT_REFRESH_EXPIRES_IN: 30d
+      PORT: 5000
+      NODE_ENV: production
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - "5000:5000"
+      - "5555:5555"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - okr_network
+    command: sh -c "npx prisma migrate deploy && npm start"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: okr_frontend
+    environment:
+      VITE_API_URL: http://localhost:5000/api
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - okr_network
+
+volumes:
+  postgres_data:
+
+networks:
+  okr_network:
+    driver: bridge

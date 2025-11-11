@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  
+  // Profile Information
+  bio             String?
+  avatar          String?
+  jobTitle        String?
+  department      String?
+  phone           String?
+  
+  // Preferences
+  timezone        String   @default("UTC")
+  language        String   @default("en")
+  dateFormat      String   @default("MM/DD/YYYY")
+  theme           String   @default("system")
+  
+  // Notification Preferences
+  emailNotifications    Boolean @default(true)
+  objectiveUpdates      Boolean @default(true)
+  teamInvites           Boolean @default(true)
+  krMilestones          Boolean @default(true)
+  weeklyDigest          Boolean @default(true)
+  
+  // Security & Activity
+  lastLoginAt     DateTime?
+  lastLoginIp     String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships     TeamMember[]
+  objectives      Objective[]
+  updates         Update[]
+  invitationsSent TeamInvitation[] @relation("UserInvitations")
+
+  // ✅ Relation with KRUpdate (for per-KeyResult progress updates)
+  krUpdates KRUpdate[] @relation("UserKRUpdates")
+
+  @@map("users")
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships TeamMember[]
+  objectives  Objective[]
+  invitations TeamInvitation[]
+
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  role      Role     @default(MEMBER)
+  userId    String
+  teamId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+  @@map("team_members")
+}
+
+model Objective {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime
+  progress    Float    @default(0)
+  status      Status   @default(IN_PROGRESS)
+  ownerId     String
+  teamId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner      User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  team       Team        @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  keyResults KeyResult[]
+  updates    Update[]
+
+  @@map("objectives")
+}
+
+model KeyResult {
+  id          String   @id @default(cuid())
+  title       String
+  target      Float
+  current     Float    @default(0)
+  unit        String   @default("%")
+  objectiveId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  objective Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+
+  // ✅ Relation for per-KeyResult updates
+  krUpdates KRUpdate[] @relation("KeyResultKRUpdates")
+
+  @@map("key_results")
+}
+
+model KRUpdate {
+  id          String   @id @default(cuid())
+  progress    Float?
+  blockers    String?
+  note        String?
+  keyResultId String
+  userId      String
+  createdAt   DateTime @default(now())
+
+  // ✅ Correctly linked relations
+  keyResult KeyResult @relation("KeyResultKRUpdates", fields: [keyResultId], references: [id])
+  user      User      @relation("UserKRUpdates", fields: [userId], references: [id])
+}
+
+model Update {
+  id          String   @id @default(cuid())
+  content     String
+  progress    Float?
+  blockers    String?
+  objectiveId String
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  objective Objective @relation(fields: [objectiveId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("updates")
+}
+
+model TeamInvitation {
+  id          String    @id @default(cuid())
+  email       String
+  token       String    @unique
+  role        Role      @default(MEMBER)
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  teamId      String
+  invitedById String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  team      Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  invitedBy User @relation("UserInvitations", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, email])
+  @@map("team_invitations")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum Status {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  AT_RISK
+  BLOCKED
+}

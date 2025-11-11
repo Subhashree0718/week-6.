@@ -1,0 +1,148 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eef2ff',
+          100: '#e0e7ff',
+          200: '#c7d2fe',
+          300: '#a5b4fc',
+          400: '#818cf8',
+          500: '#6366f1',
+          600: '#4f46e5',
+          700: '#4338ca',
+          800: '#3730a3',
+          900: '#312e81',
+          950: '#1e1b4b',
+        },
+        accent: {
+          50: '#f0fdfa',
+          100: '#ccfbf1',
+          200: '#99f6e4',
+          300: '#5eead4',
+          400: '#2dd4bf',
+          500: '#14b8a6',
+          600: '#0d9488',
+          700: '#0f766e',
+          800: '#115e59',
+          900: '#134e4a',
+          950: '#042f2e',
+        },
+        secondary: {
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5f5',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
+        },
+        amber: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
+          950: '#451a03',
+        },
+      },
+      fontFamily: {
+        sans: ['"Manrope"', 'Inter', 'system-ui', 'sans-serif'],
+      },
+      boxShadow: {
+        floating: '0 20px 45px -16px rgba(99, 102, 241, 0.45)',
+        glow: '0 0 40px rgba(79, 70, 229, 0.35)',
+        card: '0 25px 55px -24px rgba(15, 23, 42, 0.5)',
+      },
+      borderRadius: {
+        xl: '1.25rem',
+        '2xl': '1.75rem',
+      },
+      backgroundImage: {
+        'gradient-brand': 'linear-gradient(135deg, #6366f1 0%, #14b8a6 100%)',
+        'gradient-sunrise': 'linear-gradient(135deg, rgba(251, 191, 36, 0.9) 0%, rgba(99, 102, 241, 0.9) 50%, rgba(20, 184, 166, 0.9) 100%)',
+        'radial-fade': 'radial-gradient(circle at top, rgba(99, 102, 241, 0.45), transparent 55%)',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translate3d(0, 0, 0)' },
+          '50%': { transform: 'translate3d(0, -12px, 0)' },
+        },
+        blob: {
+          '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
+          '33%': { transform: 'translate(30px, -20px) scale(1.05)' },
+          '66%': { transform: 'translate(-20px, 25px) scale(0.97)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        pulseGlow: {
+          '0%, 100%': { opacity: 0.6, boxShadow: '0 0 0 0 rgba(99, 102, 241, 0.45)' },
+          '50%': { opacity: 1, boxShadow: '0 0 25px 4px rgba(99, 102, 241, 0.55)' },
+        },
+        wiggle: {
+          '0%, 100%': { transform: 'rotate(-1deg)' },
+          '50%': { transform: 'rotate(1deg)' },
+        },
+        gradientShift: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        fadeUp: {
+          '0%': { opacity: 0, transform: 'translate3d(0, 24px, 0) scale(0.96)' },
+          '100%': { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' },
+        },
+        scaleIn: {
+          '0%': { opacity: 0, transform: 'scale(0.92)' },
+          '100%': { opacity: 1, transform: 'scale(1)' },
+        },
+        orb: {
+          '0%': { transform: 'rotate(0deg) translateX(0px) rotate(0deg)' },
+          '50%': { transform: 'rotate(180deg) translateX(35px) rotate(-180deg)' },
+          '100%': { transform: 'rotate(360deg) translateX(0px) rotate(-360deg)' },
+        },
+        tilt: {
+          '0%': { transform: 'rotate3d(1, 1, 0, 0deg)' },
+          '50%': { transform: 'rotate3d(1, 1, 0, 4deg)' },
+          '100%': { transform: 'rotate3d(1, 1, 0, 0deg)' },
+        },
+        fadeIn: {
+          '0%': { opacity: 0 },
+          '100%': { opacity: 1 },
+        },
+      },
+      animation: {
+        float: 'float 6s ease-in-out infinite',
+        blob: 'blob 12s infinite',
+        shimmer: 'shimmer 2.5s linear infinite',
+        'pulse-glow': 'pulseGlow 2.8s ease-in-out infinite',
+        'spin-slow': 'spin 1.4s linear infinite',
+        wiggle: 'wiggle 3.5s ease-in-out infinite',
+        'gradient-shift': 'gradientShift 18s ease infinite',
+        'fade-up': 'fadeUp 0.8s ease-out forwards',
+        'scale-in': 'scaleIn 0.45s ease-out forwards',
+        'orb-slow': 'orb 14s linear infinite',
+        tilt: 'tilt 8s ease-in-out infinite',
+        'fade-in': 'fadeIn 0.35s ease-out forwards',
+      },
+    },
+  },
+  plugins: [],
+}

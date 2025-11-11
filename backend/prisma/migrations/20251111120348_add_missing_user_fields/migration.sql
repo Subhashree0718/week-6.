@@ -1,0 +1,17 @@
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN     "avatar" TEXT,
+ADD COLUMN     "bio" TEXT,
+ADD COLUMN     "dateFormat" TEXT NOT NULL DEFAULT 'MM/DD/YYYY',
+ADD COLUMN     "department" TEXT,
+ADD COLUMN     "emailNotifications" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "jobTitle" TEXT,
+ADD COLUMN     "krMilestones" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "language" TEXT NOT NULL DEFAULT 'en',
+ADD COLUMN     "lastLoginAt" TIMESTAMP(3),
+ADD COLUMN     "lastLoginIp" TEXT,
+ADD COLUMN     "objectiveUpdates" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "phone" TEXT,
+ADD COLUMN     "teamInvites" BOOLEAN NOT NULL DEFAULT true,
+ADD COLUMN     "theme" TEXT NOT NULL DEFAULT 'system',
+ADD COLUMN     "timezone" TEXT NOT NULL DEFAULT 'UTC',
+ADD COLUMN     "weeklyDigest" BOOLEAN NOT NULL DEFAULT true;
