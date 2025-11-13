@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://week-6-a9qe.onrender.com',
         changeOrigin: true,
       },
     },

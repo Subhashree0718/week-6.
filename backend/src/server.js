@@ -133,6 +133,7 @@ const ALLOWED_ORIGINS = [
   "http://okr-tracker-frontend-dev.s3-website-us-east-1.amazonaws.com",
   "https://d3j41da4i656xk.cloudfront.net",
   "http://localhost:5173", 
+  "https://week-6-9bm7.vercel.app"
 ];
 
 app.use(
