@@ -111,14 +111,12 @@
 // app.use(errorHandler);
 
 // export default app;
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { logger } from "./utils/logger.js";
 import { errorHandler, notFound } from "./middleware/error.js";
 
-// Routes
 import authRoutes from "./modules/auth/auth.routes.js";
 import teamRoutes from "./modules/teams/routes.js";
 import objectiveRoutes from "./modules/objectives/routes.js";
@@ -129,41 +127,25 @@ dotenv.config();
 
 const app = express();
 
-const ALLOWED_ORIGINS = [
-  "http://okr-tracker-frontend-dev.s3-website-us-east-1.amazonaws.com",
-  "https://d3j41da4i656xk.cloudfront.net",
-  "http://localhost:5173", 
-  "https://week-6-9bm7.vercel.app"
-];
-
+// 🚀 Allow ALL origins
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed for this origin: " + origin));
-      }
-    },
+    origin: "*",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
   })
 );
 
 app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  return res.sendStatus(204); // no content
+  return res.sendStatus(204);
 });
 
-// ✅ 3. Express setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ 4. Request logging (optional)
 app.use((req, res, next) => {
   logger.http(`${req.method} ${req.path}`);
   next();
@@ -172,20 +154,17 @@ app.use((req, res, next) => {
 app.get("/health", (req, res) => {
   res.json({
     success: true,
-    message: "Server is running fine ✅",
-    allowedOrigins: ALLOWED_ORIGINS,
+    message: "Server is running fine",
     timestamp: new Date().toISOString(),
   });
 });
 
-// ✅ 6. API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/objectives", objectiveRoutes);
 app.use("/api", keyResultRoutes);
 app.use("/api/updates", updateRoutes);
 
-// ✅ 7. Error handling
 app.use(notFound);
 app.use(errorHandler);
 
