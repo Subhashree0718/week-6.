@@ -11,6 +11,7 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import { useAuth } from '../hooks/useAuth';
 import { AcceptInvite } from '../pages/AcceptInvite';  // ✅ fix import path
 import { ProfileSettings } from '../pages/profile/ProfileSettings';
+import { AddMemberForm } from '../pages/teams/AddMemberForm';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -78,9 +79,14 @@ export const router = createBrowserRouter([
             element: <TeamDetail />,
           },
           {
+            path: 'teams/:id/add-member',  // ✅ added new route
+            element: <AddMemberForm />,
+          },
+          {
             path: 'profile',
             element: <ProfileSettings />,
           },
+          
         ],
       },
     ],

@@ -1,162 +1,129 @@
-// backend/src/features/objectives/service.js
 import prisma from '../../config/prisma.js';
 import AppError from '../../core/AppError.js';
 
-class ObjectiveService {
+class UpdateService {
   /**
-   * Create an objective
+   * Create a new update entry linked to an objective
    */
-  async createObjective(userId, data) {
-    const objective = await prisma.objective.create({
+  async createUpdate(userId, data) {
+    const { objectiveId, content, progress } = data;
+
+    if (!objectiveId || !content) {
+      throw new AppError('Objective ID and content are required', 400);
+    }
+
+    return await prisma.update.create({
       data: {
-        title: data.title,
-        description: data.description || null,
-        startDate: new Date(data.startDate),
-        endDate: new Date(data.endDate),
-        ownerId: userId,
-        teamId: data.teamId,
-        progress: data.progress ?? 0,
-        status: data.status ?? 'IN_PROGRESS',
+        objectiveId,
+        userId,
+        content,
+        progress: progress ?? 0,
       },
       include: {
-        owner: { select: { id: true, name: true, email: true } },
-        team: { select: { id: true, name: true } },
-        keyResults: true,
+        user: {
+          select: { id: true, name: true, email: true },
+        },
       },
     });
-
-    return objective;
   }
 
   /**
-   * Get objectives visible to a user (supports filters param)
-   * filters is a plain object that will be converted to query string client-side;
-   * here we accept an optional teamId or status filter from filters.
+   * ✅ FIX: Get all updates for an objective
    */
-  async getObjectives(userId, filters = {}) {
-    const where = {
-      // Objective must belong to a team where the user is a member
-      team: {
-        memberships: {
-          some: {
-            userId,
-          },
-        },
-      },
-    };
+  async getUpdates(objectiveId, userId) {
+    if (!objectiveId) throw new AppError('Objective ID is required', 400);
 
-    // optional filters
-    if (filters.teamId) {
-      where.teamId = filters.teamId;
-    }
-    if (filters.status) {
-      where.status = filters.status;
-    }
-
-    const objectives = await prisma.objective.findMany({
-      where,
-      include: {
-        owner: { select: { id: true, name: true, email: true } },
-        team: { select: { id: true, name: true } },
-        keyResults: {
-          orderBy: { createdAt: 'asc' },
-          // NO nested `updates` include here — KeyResult has no updates relation in your schema
-        },
-        // If you want recent updates for the objective itself:
-        updates: {
-          orderBy: { createdAt: 'desc' },
-          take: 3,
-          include: {
-            user: { select: { id: true, name: true, email: true } },
-          },
-        },
-        _count: {
-          select: {
-            updates: true,
+    return await prisma.update.findMany({
+      where: {
+        objectiveId,
+        objective: {
+          team: {
+            memberships: {
+              some: { userId },
+            },
           },
         },
       },
       orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true },
+        },
+      },
     });
-
-    return objectives;
   }
 
   /**
-   * Get single objective by id (ensures user is a member of the objective's team)
+   * Get single update by ID
    */
-  async getObjectiveById(objectiveId, userId) {
-    const objective = await prisma.objective.findFirst({
+  async getUpdateById(updateId, userId) {
+    const update = await prisma.update.findFirst({
       where: {
-        id: objectiveId,
-        team: {
-          memberships: {
-            some: {
-              userId,
+        id: updateId,
+        objective: {
+          team: {
+            memberships: {
+              some: { userId },
             },
           },
         },
       },
       include: {
-        owner: { select: { id: true, name: true, email: true } },
-        team: { select: { id: true, name: true } },
-        keyResults: {
-          orderBy: { createdAt: 'asc' },
-        },
-        updates: {
-          orderBy: { createdAt: 'desc' },
-          take: 10,
-          include: {
-            user: { select: { id: true, name: true, email: true } },
-          },
-        },
-        _count: {
-          select: {
-            updates: true,
+        user: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    if (!update) throw new AppError('Update not found or access denied', 404);
+    return update;
+  }
+
+  /**
+   * Update an update entry
+   */
+  async updateUpdate(updateId, userId, data) {
+    const update = await prisma.update.findFirst({
+      where: {
+        id: updateId,
+        objective: {
+          team: {
+            memberships: {
+              some: { userId },
+            },
           },
         },
       },
     });
 
-    if (!objective) {
-      throw new AppError('Objective not found or access denied', 404);
-    }
+    if (!update) throw new AppError('Update not found or unauthorized', 403);
 
-    return objective;
+    return await prisma.update.update({
+      where: { id: updateId },
+      data,
+    });
   }
 
   /**
-   * Update objective
+   * Delete an update
    */
-  async updateObjective(objectiveId, userId, data) {
-    // Optional: verify owner or membership/permission here before update.
-    const objective = await prisma.objective.update({
-      where: { id: objectiveId },
-      data: {
-        title: data.title,
-        description: data.description,
-        startDate: data.startDate ? new Date(data.startDate) : undefined,
-        endDate: data.endDate ? new Date(data.endDate) : undefined,
-        progress: data.progress,
-        status: data.status,
-      },
-      include: {
-        owner: { select: { id: true, name: true, email: true } },
-        team: { select: { id: true, name: true } },
-        keyResults: true,
+  async deleteUpdate(updateId, userId) {
+    const update = await prisma.update.findFirst({
+      where: {
+        id: updateId,
+        objective: {
+          team: {
+            memberships: {
+              some: { userId },
+            },
+          },
+        },
       },
     });
 
-    return objective;
-  }
+    if (!update) throw new AppError('Update not found or unauthorized', 403);
 
-  /**
-   * Delete objective
-   */
-  async deleteObjective(objectiveId) {
-    await prisma.objective.delete({ where: { id: objectiveId } });
-    return { message: 'Objective deleted successfully' };
+    await prisma.update.delete({ where: { id: updateId } });
+    return { message: 'Update deleted successfully' };
   }
 }
 
-export default new ObjectiveService();
+export default new UpdateService();

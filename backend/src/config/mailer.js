@@ -26,8 +26,8 @@ export const sendMail = async (to, subject, html, text) => {
       html,
     });
 
-    logger.info(`📧 Email sent to ${to}: ${info.messageId}`);
+    logger.info(`Email sent to ${to}: ${info.messageId}`);
   } catch (error) {
-    logger.error('❌ Failed to send invitation email:', error.message);
+    logger.error('Failed to send invitation email:', error.message);
   }
 };

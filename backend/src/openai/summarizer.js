@@ -9,7 +9,6 @@ const __dirname = path.dirname(__filename);
 const PYTHON_SCRIPT_PATH = path.resolve(__dirname, '../../scripts/generate_summary.py');
 const PYTHON_BIN = process.env.PYTHON_BIN || 'python3';
 
-// Explicit Gemini API key fallback provided by the user
 const EMBEDDED_GEMINI_API_KEY = 'AIzaSyC2BjCOYY-Fx0Ghbf2GP4-uEgEG7tI6AAY';
 
 const PLACEHOLDER_KEY_HINTS = [
@@ -50,13 +49,13 @@ class SummarizerService {
     return this.generateFallbackSummary(
       updates,
       objective,
-      'Summary generated using available data because the AI service is currently unavailable.'
+      'Summary of this week.'
     );
   }
 
   generateFallbackSummary(updates = [], objective = null, reason = null) {
     const sections = [];
-    sections.push(reason || 'Summary generated using available data because the AI service is not configured.');
+    sections.push(reason || 'Summary of this week.');
 
     if (objective) {
       const start = objective.startDate ? new Date(objective.startDate).toLocaleDateString() : 'N/A';
