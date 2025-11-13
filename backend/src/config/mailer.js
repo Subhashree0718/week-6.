@@ -5,7 +5,7 @@ import { logger } from '../utils/logger.js';
 const transporter = nodemailer.createTransport({
   host: config.SMTP_HOST,
   port: config.SMTP_PORT,
-  secure: config.SMTP_SECURE === 'true' || config.SMTP_SECURE === true, // handle boolean or string
+  secure: config.SMTP_SECURE === 'true' || config.SMTP_SECURE === true,
   auth: {
     user: config.SMTP_USER,
     pass: config.SMTP_PASS,
